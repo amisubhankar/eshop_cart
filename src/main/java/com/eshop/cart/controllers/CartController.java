@@ -1,14 +1,19 @@
 package com.eshop.cart.controllers;
 
+import com.eshop.cart.dtos.CartRequestDto;
 import com.eshop.cart.dtos.CartResponseDto;
+import com.eshop.cart.exceptions.CartIsEmptyException;
+import com.eshop.cart.exceptions.CartNotFoundException;
 import com.eshop.cart.exceptions.ProductNotFoundException;
-import com.eshop.cart.exceptions.UserNotFoundException;
 import com.eshop.cart.models.Cart;
 import com.eshop.cart.services.CartService;
-import com.netflix.discovery.converters.Auto;
+import jakarta.ws.rs.Path;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
+import org.springframework.stereotype.Repository;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
 
 @RestController
 @RequestMapping("/cart")
@@ -26,8 +31,23 @@ public class CartController {
         return ResponseEntity.ok().body(cartResponseDto);
     }
 
-    @GetMapping("/")
-    public String test(){
-        return "Working!!";
+    @GetMapping("/{userId}")
+    public ResponseEntity<List<CartResponseDto>> getCartDetails(@PathVariable("userId") Long userId)
+            throws CartIsEmptyException {
+        return ResponseEntity.ok().body(cartService.getCartDetails(userId));
+    }
+
+    @PutMapping("/update")
+    public ResponseEntity<String> updateCart(@RequestBody CartRequestDto cartRequestDto) throws CartNotFoundException {
+        cartService.updateCart(cartRequestDto);
+
+        return ResponseEntity.ok().body("Cart updated successfully !!");
+    }
+
+    @DeleteMapping("/delete/{id}")
+    public ResponseEntity<String> deleteCart(@PathVariable("id") Long id) throws CartNotFoundException {
+        cartService.deleteCart(id);
+
+        return ResponseEntity.ok().body("Cart deleted successfully !!");
     }
 }

@@ -1,7 +1,8 @@
 package com.eshop.cart.controlleradvice;
 
+import com.eshop.cart.exceptions.CartIsEmptyException;
+import com.eshop.cart.exceptions.CartNotFoundException;
 import com.eshop.cart.exceptions.ProductNotFoundException;
-import com.eshop.cart.exceptions.UserNotFoundException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.ExceptionHandler;
@@ -15,8 +16,13 @@ public class AnyControllerAdvice {
         return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Product not found !!");
     }
 
-    @ExceptionHandler(UserNotFoundException.class)
-    public ResponseEntity<String> handleUserNotFound(){
-        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("User not found !!");
+    @ExceptionHandler(CartIsEmptyException.class)
+    public ResponseEntity<String> handleCartEmpty(){
+        return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Your cart is empty !!");
+    }
+
+    @ExceptionHandler(CartNotFoundException.class)
+    public ResponseEntity<String> handleCartNotFound(){
+        return ResponseEntity.badRequest().body("Cart not found !!");
     }
 }
