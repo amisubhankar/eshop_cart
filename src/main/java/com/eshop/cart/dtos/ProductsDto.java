@@ -17,5 +17,5 @@ public class ProductsDto {
     private String image;
     private float price;
     private int availableQuantity;
-
+    private Long categoryId;
 }
