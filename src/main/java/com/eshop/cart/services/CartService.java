@@ -9,6 +9,7 @@ import com.eshop.cart.exceptions.ProductNotFoundException;
 import com.eshop.cart.models.Cart;
 import com.eshop.cart.repositories.ICartRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 
@@ -23,6 +24,9 @@ public class CartService {
     ICartRepository cartRepository;
     @Autowired
     RestTemplate restTemplate;
+
+    @Autowired
+    RedisTemplate redisTemplate;
 
     public CartResponseDto addToCart(Cart cart, String header) throws ProductNotFoundException {
 
@@ -55,20 +59,25 @@ public class CartService {
     }
 
     public List<CartResponseDto> getCartDetails(Long userId) throws CartIsEmptyException {
-        List<Cart> cartList = cartRepository.findByUserId(userId);
+        if(redisTemplate.opsForHash().hasKey("carts-"+userId, "something") == false) {
 
-        if(cartList.isEmpty()){
-            throw new CartIsEmptyException();
+            List<Cart> cartList = cartRepository.findByUserId(userId);
+
+            if (cartList.isEmpty()) {
+                throw new CartIsEmptyException();
+            }
+
+            List<CartResponseDto> cartResponseDtoList = new ArrayList<>();
+            for (Cart cart : cartList) {
+                ProductsDto product = restTemplate.getForObject("http://products/products/" + cart.getProductId(),
+                        ProductsDto.class);
+                cartResponseDtoList.add(new CartResponseDto(product.getName(), cart.getQuantity(), cart.getAmount(), ""));
+            }
+
+            redisTemplate.opsForHash().put("carts-"+userId, "something", cartResponseDtoList);
         }
 
-        List<CartResponseDto> cartResponseDtoList = new ArrayList<>();
-        for(Cart cart : cartList){
-            ProductsDto product = restTemplate.getForObject("http://products/products/" + cart.getProductId(),
-                    ProductsDto.class);
-            cartResponseDtoList.add(new CartResponseDto(product.getName(), cart.getQuantity(), cart.getAmount(), ""));
-        }
-
-        return cartResponseDtoList;
+        return (List<CartResponseDto>) redisTemplate.opsForHash().get("carts-"+userId, "something");
     }
 
     public void updateCart(CartRequestDto cartRequestDto) throws CartNotFoundException {

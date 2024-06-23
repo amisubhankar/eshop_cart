@@ -1,13 +1,17 @@
 package com.eshop.cart.dtos;
 
+import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.Setter;
 
+import java.io.Serializable;
+
 @Getter
 @Setter
 @AllArgsConstructor
-public class CartResponseDto {
+@JsonSerialize
+public class CartResponseDto implements Serializable {
     private String productName;
     private int quantity;
     private float amount;
