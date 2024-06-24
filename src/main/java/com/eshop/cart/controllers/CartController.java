@@ -31,10 +31,10 @@ public class CartController {
         return ResponseEntity.ok().body(cartResponseDto);
     }
 
-    @GetMapping("/{userId}")
-    public ResponseEntity<List<CartResponseDto>> getCartDetails(@PathVariable("userId") Long userId)
+    @GetMapping("/user/{userId}")
+    public ResponseEntity<List<CartResponseDto>> getCartDetailsbyUser(@PathVariable("userId") Long userId)
             throws CartIsEmptyException {
-        return ResponseEntity.ok().body(cartService.getCartDetails(userId));
+        return ResponseEntity.ok().body(cartService.getCartDetailsbyUser(userId));
     }
 
     @PutMapping("/update")
@@ -49,5 +49,10 @@ public class CartController {
         cartService.deleteCart(id);
 
         return ResponseEntity.ok().body("Cart deleted successfully !!");
+    }
+
+    @GetMapping("/{id}")
+    public ResponseEntity<Cart> getCartDetails(@PathVariable("id") Long cartId){
+        return ResponseEntity.ok().body(cartService.getCartDetails(cartId));
     }
 }

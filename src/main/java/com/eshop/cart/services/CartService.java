@@ -58,7 +58,7 @@ public class CartService {
  */
     }
 
-    public List<CartResponseDto> getCartDetails(Long userId) throws CartIsEmptyException {
+    public List<CartResponseDto> getCartDetailsbyUser(Long userId) throws CartIsEmptyException {
         if(redisTemplate.opsForHash().hasKey("carts-"+userId, "something") == false) {
 
             List<Cart> cartList = cartRepository.findByUserId(userId);
@@ -103,5 +103,10 @@ public class CartService {
         }
 
         cartRepository.deleteById(id);
+    }
+
+    public Cart getCartDetails(Long cartId) {
+        //skipping cartId validation
+        return cartRepository.findById(cartId).get();
     }
 }
