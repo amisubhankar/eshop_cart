@@ -18,6 +18,7 @@ public class ApplicationConfiguration {
 
     @Bean
     public RedisTemplate createRedisTemplate(RedisConnectionFactory redisConnectionFactory){
+
         RedisTemplate<Object, Object> redisTemplate = new RedisTemplate<>();
         redisTemplate.setConnectionFactory(redisConnectionFactory);
 

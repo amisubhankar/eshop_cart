@@ -13,6 +13,7 @@ import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 
+import java.time.Duration;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -75,9 +76,12 @@ public class CartService {
             }
 
             redisTemplate.opsForHash().put("carts-"+userId, "something", cartResponseDtoList);
+            redisTemplate.expire("carts-"+userId, Duration.ofSeconds(2L));
+            System.out.println(redisTemplate.getExpire("carts-"+userId));
         }
 
         return (List<CartResponseDto>) redisTemplate.opsForHash().get("carts-"+userId, "something");
+        //return cartResponseDtoList;
     }
 
     public void updateCart(CartRequestDto cartRequestDto) throws CartNotFoundException {
@@ -88,10 +92,11 @@ public class CartService {
         }
 
         Cart cart = optionalCart.get();
-        float itemPrice = cart.getAmount() / cart.getQuantity() ;
+        ProductsDto product = restTemplate.getForObject("http://products/products/" + cart.getProductId(),
+                ProductsDto.class);
 
         cart.setQuantity(cartRequestDto.getQuantity());
-        cart.setAmount(cartRequestDto.getQuantity() * itemPrice);
+        cart.setAmount(cartRequestDto.getQuantity() * product.getPrice());
         cartRepository.save(cart);
     }
 

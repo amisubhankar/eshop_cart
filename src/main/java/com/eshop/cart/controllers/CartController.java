@@ -34,7 +34,8 @@ public class CartController {
     @GetMapping("/user/{userId}")
     public ResponseEntity<List<CartResponseDto>> getCartDetailsbyUser(@PathVariable("userId") Long userId)
             throws CartIsEmptyException {
-        return ResponseEntity.ok().body(cartService.getCartDetailsbyUser(userId));
+        List<CartResponseDto> list = cartService.getCartDetailsbyUser(userId);
+        return ResponseEntity.ok().body(list);
     }
 
     @PutMapping("/update")
