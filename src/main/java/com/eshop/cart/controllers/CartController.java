@@ -1,5 +1,6 @@
 package com.eshop.cart.controllers;
 
+import com.eshop.cart.dtos.CartDeleteRequestDto;
 import com.eshop.cart.dtos.CartRequestDto;
 import com.eshop.cart.dtos.CartResponseDto;
 import com.eshop.cart.exceptions.CartIsEmptyException;
@@ -7,6 +8,8 @@ import com.eshop.cart.exceptions.CartNotFoundException;
 import com.eshop.cart.exceptions.ProductNotFoundException;
 import com.eshop.cart.models.Cart;
 import com.eshop.cart.services.CartService;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.ws.rs.Path;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
@@ -20,6 +23,8 @@ import java.util.List;
 public class CartController {
     @Autowired
     CartService cartService;
+    @Autowired
+    ObjectMapper objectMapper;
 
     @PostMapping("/add")
     public ResponseEntity<CartResponseDto> addToCart(@RequestBody Cart cart,
@@ -50,6 +55,19 @@ public class CartController {
         cartService.deleteCart(id);
 
         return ResponseEntity.ok().body("Cart deleted successfully !!");
+    }
+
+    @DeleteMapping("/delete/afterorder")
+    public ResponseEntity<String> deleteCartAfterOrderIsPlaced(@RequestParam(name = "cartIds") String cartIds){
+        CartDeleteRequestDto cartDeleteRequestDto = null;
+        try {
+            cartDeleteRequestDto = objectMapper.readValue(cartIds, CartDeleteRequestDto.class);
+        } catch (JsonProcessingException e) {
+            throw new RuntimeException(e);
+        }
+        cartService.deleteCartAfterOrderIsPlaced(cartDeleteRequestDto);
+        System.out.println("hello");
+        return ResponseEntity.ok().body("Given cart ids are deleted successfully !!");
     }
 
     @GetMapping("/{id}")

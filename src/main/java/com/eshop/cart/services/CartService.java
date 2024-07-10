@@ -1,5 +1,6 @@
 package com.eshop.cart.services;
 
+import com.eshop.cart.dtos.CartDeleteRequestDto;
 import com.eshop.cart.dtos.CartRequestDto;
 import com.eshop.cart.dtos.CartResponseDto;
 import com.eshop.cart.dtos.ProductsDto;
@@ -8,6 +9,7 @@ import com.eshop.cart.exceptions.CartNotFoundException;
 import com.eshop.cart.exceptions.ProductNotFoundException;
 import com.eshop.cart.models.Cart;
 import com.eshop.cart.repositories.ICartRepository;
+import com.eshop.cart.util.CartUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
@@ -39,8 +41,12 @@ public class CartService {
             throw new ProductNotFoundException();
         }
 
-        //save to cart
+        //setting up the amount for this cart
         cart.setAmount(cart.getQuantity() * product.getPrice());
+        //setting up userId -- fetching email from JWT token then calling UserService to get ID
+        cart.setUserId(CartUtil.getUserIdFromToken(header));
+
+        //save to DB
         cartRepository.save(cart);
         //make response object
         String message = product.getName() + " added successfully to your cart !!";
@@ -113,5 +119,10 @@ public class CartService {
     public Cart getCartDetails(Long cartId) {
         //skipping cartId validation
         return cartRepository.findById(cartId).get();
+    }
+
+    public void deleteCartAfterOrderIsPlaced(CartDeleteRequestDto cartDeleteRequestDto) {
+        System.out.println("Deleted cart ids");
+        cartRepository.deleteAllById(cartDeleteRequestDto.getCartIds());
     }
 }
